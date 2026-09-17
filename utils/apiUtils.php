@@ -87,7 +87,7 @@ function jsonResponse(?array $data, int $responseCode = 200)
 {
     http_response_code($responseCode);
     if ($data !== null) {
-        echo json_encode($data);
+        echo json_encode($data, JSON_UNESCAPED_UNICODE);
     }
     exit();
 }
