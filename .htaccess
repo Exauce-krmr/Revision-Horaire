@@ -1,0 +1,10 @@
+RewriteEngine On
+
+RewriteRule ^api/classes/([0-9]+)$ api/index.php?resource=classes&id=$1 [NC,L,QSA]
+RewriteRule ^api/classes/?$ api/index.php?resource=classes [NC,L,QSA]
+
+RewriteRule ^api/cours/([0-9]+)$ api/index.php?resource=cours&id=$1 [NC,L,QSA]
+RewriteRule ^api/cours/?$ api/index.php?resource=cours [NC,L,QSA]
+
+RewriteRule ^api/crenaux/([0-9]+)$ api/index.php?resource=crenaux&id=$1 [NC,L,QSA]
+RewriteRule ^api/crenaux/?$ api/index.php?resource=crenaux [NC,L,QSA]
