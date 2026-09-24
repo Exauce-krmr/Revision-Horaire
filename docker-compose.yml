@@ -3,8 +3,6 @@ services:
     image: mariadb:12.3
     environment:
       MARIADB_DATABASE: horaire_eleve
-      MARIADB_USER: me
-      MARIADB_PASSWORD: 1234
       MARIADB_ROOT_PASSWORD: Super
     volumes:
       - db_data:/var/lib/mysql
