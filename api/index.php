@@ -6,7 +6,7 @@ require_once __DIR__ . "/../functions/crenaux.php";
 
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
-header("Access-Control-Allow-Methods: GET, POST, DELETE");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
 
 $method = $_SERVER["REQUEST_METHOD"];
 $resource = $_GET["resource"] ?? null;
@@ -42,6 +42,18 @@ try {
 
                     createClass($body["name"], $body["schoolYear"]);
                     jsonResponse(getClassByName($body["name"])->fetch(), 201);
+
+                case "PUT":
+                    if (!$id || !getClassById($id)->fetch()) {
+                        jsonResponse([KEY_MESSAGE => "class.notFound"], 404);
+                    }
+
+                    if (!array_keys_exist($body, "name", "schoolYear")) {
+                        jsonResponse([KEY_MESSAGE => "fields.missing"], 400);
+                    }
+
+                    updateClass($id, $body["name"], $body["schoolYear"]);
+                    jsonResponse(getClassById($id)->fetch());
 
                 case "DELETE":
                     if (!$id || !getClassById($id)->fetch()) {
@@ -89,6 +101,18 @@ try {
                     $created = getCourseByCode($body["code"])->fetch();
                     jsonResponse($created, 201);
 
+                case "PUT":
+                    if (!$id || !getCourseById($id)->fetch()) {
+                        jsonResponse([KEY_MESSAGE => "course.notFound"], 404);
+                    }
+
+                    if (!array_keys_exist($body, "name", "code")) {
+                        jsonResponse([KEY_MESSAGE => "fields.missing"], 400);
+                    }
+
+                    updateCourse($id, $body["name"], $body["code"]);
+                    jsonResponse(getCourseById($id)->fetch());
+
                 case "DELETE":
                     if (!$id || !getCourseById($id)->fetch()) {
                         jsonResponse([KEY_MESSAGE => "course.notFound"], 404);
@@ -128,6 +152,26 @@ try {
 
                     createSlot($body["classe"], $body["course"], $body["day"], $body["startHour"], $body["endHour"], $body["room"]);
                     jsonResponse([KEY_MESSAGE => "slot.created"], 201);
+
+                case "PUT":
+                    if (!$id || !getSlotById($id)->fetch()) {
+                        jsonResponse([KEY_MESSAGE => "slot.notFound"], 404);
+                    }
+
+                    if (!array_keys_exist($body, "classe", "course", "day", "startHour", "endHour", "room")) {
+                        jsonResponse([KEY_MESSAGE => "fields.missing"], 400);
+                    }
+
+                    if (!Days::tryFrom($body["day"])) {
+                        jsonResponse([KEY_MESSAGE => "day.invalid"], 400);
+                    }
+
+                    if (hasSlotConflict($body["classe"], $body["room"], $body["day"], $body["startHour"], $body["endHour"], $id)) {
+                        jsonResponse([KEY_MESSAGE => "slot.conflict"], 400);
+                    }
+
+                    updateSlot($id, $body["classe"], $body["course"], $body["day"], $body["startHour"], $body["endHour"], $body["room"]);
+                    jsonResponse(getSlotById($id)->fetch());
 
                 case "DELETE":
                     if (!$id || !getSlotById($id)->fetch()) {
