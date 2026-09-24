@@ -2,5 +2,5 @@
 define('DB_HOST', 'db');
 
 define('DB_NAME', 'horaire_eleve');
-define('DB_USER', 'me');
-define('DB_PASSWORD', '1234');
+define('DB_USER', 'root');
+define('DB_PASSWORD', 'Super');
