@@ -1,0 +1,38 @@
+info:
+  name: Update
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{BASE_URL}}/{{ENDPOINT}}/{{id}}"
+  auth: inherit
+  body:
+    type: json
+    data: |
+      {
+        "name": "{{name}}",
+        "schoolYear": "{{schoolYear}}"
+      }
+
+runtime:
+  variables:
+    - name: id
+      value:
+        type: number
+        data: "1"
+    - name: name
+      value:
+        type: string
+        data: I.DA-P3A
+    - name: schoolYear
+      value:
+        type: string
+        data: "2026-2027"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

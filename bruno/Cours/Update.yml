@@ -1,0 +1,38 @@
+info:
+  name: Update
+  type: http
+  seq: 5
+
+http:
+  method: PUT
+  url: "{{BASE_URL}}/{{ENDPOINT}}/{{id}}"
+  auth: inherit
+  body:
+    type: json
+    data: |
+      {
+        "name": "{{name}}",
+        "code": "{{code}}"
+      }
+
+runtime:
+  variables:
+    - name: id
+      value:
+        type: number
+        data: "1"
+    - name: name
+      value:
+        type: string
+        data: Atelier Web 3e année S1
+    - name: code
+      value:
+        type: string
+        data: AWEB3
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

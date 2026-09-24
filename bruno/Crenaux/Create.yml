@@ -1,0 +1,54 @@
+info:
+  name: Create
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{BASE_URL}}/{{ENDPOINT}}"
+  auth: inherit
+  body:
+    type: json
+    data: |
+      {
+        "classe": {{classe}},
+        "course": {{course}},
+        "day": "{{day}}",
+        "startHour": "{{startHour}}",
+        "endHour": "{{endHour}}",
+        "room": "{{room}}"
+      }
+
+runtime:
+  variables:
+    - name: classe
+      value:
+        type: number
+        data: "1"
+    - name: course
+      value:
+        type: number
+        data: "1"
+    - name: day
+      value:
+        type: string
+        data: lundi
+    - name: startHour
+      value:
+        type: string
+        data: "09:00"
+    - name: endHour
+      value:
+        type: string
+        data: "10:00"
+    - name: room
+      value:
+        type: string
+        data: R999
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

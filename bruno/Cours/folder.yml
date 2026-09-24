@@ -1,0 +1,10 @@
+info:
+  name: Cours
+  type: folder
+  seq: 2
+
+request:
+  auth: inherit
+  variables:
+    - name: ENDPOINT
+      value: cours
