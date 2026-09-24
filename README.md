@@ -18,3 +18,7 @@ Le site est accessible via l'url : http://localhost:8080
 ## ENDPOINTS de l'API
 
 Vous pouver voir les endpoints via le fichier (à ouvrir dans le navigateur) : [endpoints.html](endpoints.html).
+
+## Diagrammes de gantt
+
+[Horaire_eleve diagramme de gantt.pdf](Horaire_eleve%20diagramme%20de%20gantt.pdf)
