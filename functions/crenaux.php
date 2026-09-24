@@ -20,6 +20,39 @@ function getSlotById($id)
     return $stmt;
 }
 
+function getSlotsDetailed()
+{
+    global $db;
+    $stmt = $db->prepare("SELECT crenaux.id, crenaux.classe_id, crenaux.cours_id,
+                                  classes.nom AS classe_nom, cours.nom AS cours_nom, cours.code AS cours_code,
+                                  crenaux.jour, crenaux.heure_debut, crenaux.heure_fin, crenaux.salle
+                           FROM crenaux
+                           JOIN classes ON classes.id = crenaux.classe_id
+                           JOIN cours ON cours.id = crenaux.cours_id
+                           ORDER BY FIELD(crenaux.jour, 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'), crenaux.heure_debut");
+    $stmt->execute();
+    return $stmt;
+}
+
+function updateSlot($id, $classId, $courseId, $day, $startHour, $endHour, $room)
+{
+    global $db;
+    $stmt = $db->prepare("UPDATE crenaux
+                           SET classe_id = :classe_id, cours_id = :cours_id, jour = :jour,
+                               heure_debut = :heure_debut, heure_fin = :heure_fin, salle = :salle
+                           WHERE id = :id");
+    $stmt->execute([
+        "classe_id" => $classId,
+        "cours_id" => $courseId,
+        "jour" => $day,
+        "heure_debut" => $startHour,
+        "heure_fin" => $endHour,
+        "salle" => $room,
+        "id" => $id,
+    ]);
+    return $stmt;
+}
+
 function deleteSlot($id)
 {
     global $db;
@@ -44,21 +77,29 @@ function getSlotsByClassName($className)
     return $stmt;
 }
 
-function hasSlotConflict($classId, $room, $day, $startHour, $endHour)
+function hasSlotConflict($classId, $room, $day, $startHour, $endHour, $excludeId = null)
 {
     global $db;
-    $stmt = $db->prepare("SELECT COUNT(*) FROM crenaux
-                           WHERE jour = :jour
-                             AND heure_debut < :heure_fin
-                             AND heure_fin > :heure_debut
-                             AND (classe_id = :classe_id OR salle = :salle)");
-    $stmt->execute([
+    $query = "SELECT COUNT(*) FROM crenaux
+              WHERE jour = :jour
+                AND heure_debut < :heure_fin
+                AND heure_fin > :heure_debut
+                AND (classe_id = :classe_id OR salle = :salle)";
+    $params = [
         "jour" => $day,
         "heure_debut" => $startHour,
         "heure_fin" => $endHour,
         "classe_id" => $classId,
         "salle" => $room,
-    ]);
+    ];
+
+    if ($excludeId !== null) {
+        $query .= " AND id != :exclude_id";
+        $params["exclude_id"] = $excludeId;
+    }
+
+    $stmt = $db->prepare($query);
+    $stmt->execute($params);
     return $stmt->fetchColumn() > 0;
 }
 
@@ -86,6 +127,7 @@ function handleSlotForm()
         return $errors;
     }
 
+    $id = filter_input(INPUT_POST, "id", FILTER_VALIDATE_INT);
     $classId = filter_input(INPUT_POST, "classe", FILTER_VALIDATE_INT);
     $courseId = filter_input(INPUT_POST, "course", FILTER_VALIDATE_INT);
     $day = sanitizeInput($_POST["day"] ?? "", Type::string);
@@ -121,13 +163,18 @@ function handleSlotForm()
         $errors["room"] = "Le nom de la salle ne peut pas dépasser 20 caractères.";
     }
 
-    if (!$errors && hasSlotConflict($classId, $room, $day, $startHour, $endHour)) {
+    if (!$errors && hasSlotConflict($classId, $room, $day, $startHour, $endHour, $id)) {
         $errors["room"] = "Ce créneau chevauche déjà un cours pour cette classe ou cette salle.";
     }
 
     if (!$errors) {
-        createSlot($classId, $courseId, $day, $startHour, $endHour, $room);
-        header("Location: horaire.php");
+        if ($id) {
+            updateSlot($id, $classId, $courseId, $day, $startHour, $endHour, $room);
+            header("Location: /index.php");
+        } else {
+            createSlot($classId, $courseId, $day, $startHour, $endHour, $room);
+            header("Location: horaire.php");
+        }
         exit;
     }
 

@@ -37,6 +37,14 @@ function createClass($name, $schoolYear)
     return $stmt;
 }
 
+function updateClass($id, $name, $schoolYear)
+{
+    global $db;
+    $stmt = $db->prepare("UPDATE classes SET nom = :nom, annee_scolaire = :annee_scolaire WHERE id = :id");
+    $stmt->execute(["nom" => $name, "annee_scolaire" => $schoolYear, "id" => $id]);
+    return $stmt;
+}
+
 function deleteClass($id)
 {
     global $db;
@@ -55,6 +63,7 @@ function handleClassForm()
         return $errors;
     }
 
+    $id = filter_input(INPUT_POST, "id", FILTER_VALIDATE_INT);
     $name = sanitizeInput($_POST["name"] ?? "", Type::string);
     $schoolYear = sanitizeInput($_POST["schoolYear"] ?? "", Type::string);
 
@@ -62,8 +71,11 @@ function handleClassForm()
         $errors["name"] = "Le nom de la classe est obligatoire.";
     } elseif (strlen($name) > CLASS_NAME_MAX_LENGHT) {
         $errors["name"] = "Le nom de la classe ne doit pas dépasser " . CLASS_NAME_MAX_LENGHT . " caractères.";
-    } elseif (getClassByName($name)->rowCount() > 0) {
-        $errors["name"] = "Cette classe existe déjà.";
+    } else {
+        $existing = getClassByName($name)->fetch();
+        if ($existing && (!$id || $existing["id"] != $id)) {
+            $errors["name"] = "Cette classe existe déjà.";
+        }
     }
 
     if ($schoolYear === "") {
@@ -71,11 +83,15 @@ function handleClassForm()
     }
 
     if (!$errors) {
-        createClass($name, $schoolYear);
-        header("Location: classes.php");
+        if ($id) {
+            updateClass($id, $name, $schoolYear);
+            header("Location: /index.php");
+        } else {
+            createClass($name, $schoolYear);
+            header("Location: classes.php");
+        }
         exit;
     }
 
     return $errors;
 }
-
